@@ -1,0 +1,66 @@
+syntax = "proto3";
+package proto.code.gen;
+
+option java_package = "org.proto.query";
+option java_outer_classname = "DefaultProtoOuter0";
+option java_multiple_files = true;
+
+message _InnerMap1 {
+    map<string, int32> value = 1;
+}
+
+message _InnerMap2 {
+    map<string, _InnerRepeated1> value = 1;
+}
+
+message _InnerMap3 {
+    map<string, _InnerMap1> value = 1;
+}
+
+message _InnerRepeated1 {
+    repeated int32 value = 1;
+}
+
+message _InnerRepeated2 {
+    repeated _InnerRepeated1 value = 1;
+}
+
+message _InnerRepeated3 {
+    repeated _InnerMap1 value = 1;
+}
+
+message ProtoNestType {
+    map<string, int32> a1 = 1;
+    map<string, _InnerMap1> a2 = 2;
+    map<string, _InnerRepeated1> a3 = 3;
+    map<string, _InnerMap2> a4 = 4;
+    map<string, _InnerMap3> a5 = 5;
+    repeated int32 a6 = 6;
+    repeated _InnerMap1 a7 = 7;
+    repeated _InnerRepeated1 a8 = 8;
+    repeated _InnerRepeated2 a9 = 9;
+    repeated _InnerRepeated3 a10 = 10;
+    map<string, int32> a11 = 11;
+    map<string, _InnerMap1> a12 = 12;
+    map<string, _InnerRepeated1> a13 = 13;
+    map<string, _InnerMap2> a14 = 14;
+    map<string, _InnerMap3> a15 = 15;
+    repeated int32 a16 = 16;
+    repeated _InnerMap1 a17 = 17;
+    repeated _InnerRepeated1 a18 = 18;
+    repeated _InnerRepeated2 a19 = 19;
+    repeated _InnerRepeated3 a20 = 20;
+}
+
+message ProtoTypeCast {
+    int32 a = 1;
+    int32 a2 = 2;
+    map<string, int32> a3 = 3;
+    int32 c = 4;
+    int32 c2 = 5;
+    map<string, int32> c3 = 6;
+    int32 b = 7;
+    int32 b2 = 8;
+    map<string, int32> b3 = 9;
+}
+
