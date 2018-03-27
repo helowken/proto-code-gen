@@ -58,15 +58,7 @@ public class ProtoSerdesImpl<T> extends AbstractProtoSerdes<T> {
         try {
             Object value = sourceGetMethod.getValue(source);
             if (value != null) {
-                convertedValue = funcCache.get(codecField.getType())
-                        .map(func -> func.transform(value))
-                        .orElseGet(() -> {
-                            try {
-                                return codecField.valueConverter.apply(codecField, value, convertFunc);
-                            } catch (Throwable t) {
-                                throw ProtoUtils.wrapError(t);
-                            }
-                        });
+                convertedValue = codecField.valueConverter.apply(codecField.fieldInfo.getTypeClass(), value, convertFunc, funcCache);
                 targetSetMethod.setValue(target, convertedValue);
             }
         } catch (Throwable t) {

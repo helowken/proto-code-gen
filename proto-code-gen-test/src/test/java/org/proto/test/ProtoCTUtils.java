@@ -20,6 +20,30 @@ class ProtoCTUtils {
         return Arrays.asList(1, 2, 3);
     }
 
+    static Map<String, Short> newShortMap() {
+        Map<String, Short> map = new HashMap<>();
+        for (int i = 0; i < 3; ++i) {
+            map.put("k" + i, (short) i);
+        }
+        return map;
+    }
+
+    static Map<String, Byte> newByteMap() {
+        Map<String, Byte> map = new HashMap<>();
+        for (int i = 0; i < 3; ++i) {
+            map.put("k" + i, (byte) i);
+        }
+        return map;
+    }
+
+    static Map<String, Character> newCharMap() {
+        Map<String, Character> map = new HashMap<>();
+        for (int i = 0; i < 3; ++i) {
+            map.put("k" + i, (char) i);
+        }
+        return map;
+    }
+
     static Map<String, Integer> newMap() {
         Map<String, Integer> map = new HashMap<>();
         for (int i = 0; i < 3; ++i) {

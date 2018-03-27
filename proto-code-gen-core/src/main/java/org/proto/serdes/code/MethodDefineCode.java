@@ -19,6 +19,18 @@ public class MethodDefineCode extends CompoundCode<Code, MethodDefineCode> {
         this.name = name;
         this.returnType = returnType;
         this.params = params == null ? Collections.emptyList() : Arrays.asList(params);
+        returnType.setParent(this);
+        for (ParameterCode pc : this.params) {
+            pc.setParent(this);
+        }
+    }
+
+    @Override
+    public List<Code> getChildren() {
+        List<Code> cs = new ArrayList<>(super.getChildren());
+        cs.add(returnType);
+        cs.addAll(params);
+        return cs;
     }
 
     public int getModifier() {

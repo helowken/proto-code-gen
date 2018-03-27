@@ -21,6 +21,14 @@ public class AbstractCallCode<T extends Code> extends AbstractCode<T> {
             }
         }
         this.arguments = args;
+        for (Code arg : this.arguments) {
+            arg.setParent(this);
+        }
+    }
+
+    @Override
+    public List<Code> getChildren() {
+        return new ArrayList<>(arguments);
     }
 
     @Override

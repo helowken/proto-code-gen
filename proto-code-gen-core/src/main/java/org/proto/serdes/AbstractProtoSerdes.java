@@ -7,6 +7,7 @@ import org.proto.serdes.method.BeanFieldGetMethod;
 import org.proto.serdes.method.BeanFieldSetMethod;
 import org.proto.serdes.method.GetMethodWrapper;
 import org.proto.serdes.method.SetMethodWrapper;
+import org.proto.serdes.transform.TransformMgr;
 import org.proto.serdes.type.*;
 
 import java.lang.reflect.Method;
@@ -64,36 +65,35 @@ public abstract class AbstractProtoSerdes<T> implements ProtoSerdes<T> {
     private static final ValueConverter defaultValueConverter = new DefaultValueConverter();
 
     static {
-        valueConverterMap.put(SetFieldClass.class, AbstractProtoSerdes::newCollection);
-        valueConverterMap.put(ListFieldClass.class, AbstractProtoSerdes::newCollection);
-        valueConverterMap.put(MapFieldClass.class, AbstractProtoSerdes::newMap);
+        valueConverterMap.put(SetFieldClass.class, AbstractProtoSerdes::newCollectionFunc);
+        valueConverterMap.put(ListFieldClass.class, AbstractProtoSerdes::newCollectionFunc);
+        valueConverterMap.put(MapFieldClass.class, AbstractProtoSerdes::newMapFunc);
     }
 
-    private static Collection newCollection(final CodecField codecField, final Object oldValue, final ConvertFunc convertFunc) {
-        CollectionFieldClass typeClass = (CollectionFieldClass) codecField.fieldInfo.getTypeClass();
+    private static Collection newCollectionFunc(final TypeClass fieldTypeClass, final Object oldValue, final ConvertFunc convertFunc, final TransformMgr.FuncCache funcCache) {
+        CollectionFieldClass typeClass = (CollectionFieldClass) fieldTypeClass;
         Collection newValue = typeClass.newInstance();
         Collection oldCollection = (Collection) oldValue;
         TypeClass valueType = typeClass.getValueType();
-        if (valueType.isProto()) {
-            ProtoSerdes<?> serdes = ProtoSerdesFactory.getInstance().getSerdes(valueType);
-            oldCollection.forEach(v -> newValue.add(convertFunc.apply(serdes, v)));
-        } else {
-            newValue.addAll(oldCollection);
-        }
+        oldCollection.forEach(v ->
+                newValue.add(
+                        defaultValueConverter.apply(valueType, v, convertFunc, funcCache)
+                )
+        );
         return newValue;
     }
 
-    private static Map newMap(final CodecField codecField, final Object oldValue, final ConvertFunc convertFunc) {
+    private static Map newMapFunc(final TypeClass fieldTypeClass, final Object oldValue, final ConvertFunc convertFunc, final TransformMgr.FuncCache funcCache) {
         final Map oldMap = (Map) oldValue;
-        MapFieldClass typeClass = (MapFieldClass) codecField.fieldInfo.getTypeClass();
+        MapFieldClass typeClass = (MapFieldClass) fieldTypeClass;
         final Map newMap = typeClass.newInstance();
         TypeClass valueType = typeClass.getValueType();
-        if (valueType.isProto()) {
-            ProtoSerdes<?> serdes = ProtoSerdesFactory.getInstance().getSerdes(valueType);
-            oldMap.forEach((oKey, oValue) -> newMap.put(oKey, convertFunc.apply(serdes, oValue)));
-        } else {
-            newMap.putAll(oldMap);
-        }
+        oldMap.forEach((oKey, oValue) ->
+                newMap.put(
+                        oKey,
+                        defaultValueConverter.apply(valueType, oValue, convertFunc, funcCache)
+                )
+        );
         return newMap;
     }
 

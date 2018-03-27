@@ -12,8 +12,13 @@ import java.util.function.Predicate;
 public class CodeBody<T extends Code> extends AbstractCode {
     final List<T> statements = new ArrayList<>();
 
+    CodeBody(Code parent) {
+       this.setParent(parent);
+    }
+
     public CodeBody add(T statement) {
         statements.add(statement);
+        statement.setParent(this);
         return this;
     }
 
@@ -49,5 +54,10 @@ public class CodeBody<T extends Code> extends AbstractCode {
     @Override
     public Element getContent() {
         return newBlock().process(block -> statements.forEach(block::add));
+    }
+
+    @Override
+    public List<Code> getChildren() {
+        return new ArrayList<>(statements);
     }
 }

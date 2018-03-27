@@ -7,13 +7,14 @@ public class ParameterCode extends AbstractCode<ParameterCode> {
     private final TypeCode type;
     private final String name;
 
-    public ParameterCode(String typeName, String name) {
-        this(new TypeCode(typeName), name);
+    public ParameterCode(Class<?> clazz, String name) {
+        this(new TypeCode(clazz), name);
     }
 
     public ParameterCode(TypeCode type, String name) {
         this.type = type;
         this.name = name;
+        type.setParent(this);
     }
 
     public TypeCode getType() {

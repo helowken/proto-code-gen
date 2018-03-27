@@ -1,8 +1,8 @@
 package org.proto.serdes.type;
 
+import com.google.protobuf.Descriptors;
 import org.proto.serdes.ProtoUtils;
 import org.proto.serdes.info.ProtoClassInfo;
-import com.google.protobuf.Descriptors;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -18,7 +18,6 @@ public class FieldClass extends AbstractTypeClass {
     public Optional<String> getProtoClassName() {
         return ProtoUtils.getProtoClassInfo(rawClass).map(ProtoClassInfo::getProtoClass);
     }
-
 
     @Override
     public void compute(Descriptors.Descriptor descriptor) {

@@ -1,9 +1,9 @@
 package org.proto.serdes.transform;
 
-import org.proto.serdes.code.TypeCode;
 import org.proto.serdes.code.CastCode;
 import org.proto.serdes.code.Code;
 import org.proto.serdes.code.MethodCallCode;
+import org.proto.serdes.code.TypeCode;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -42,12 +42,18 @@ public class TransformMgr {
         public Optional<TransformFunc> get(Class<?> clazz) {
             return Optional.ofNullable(funcMap.get(clazz));
         }
+
+        public Object getValue(Class<?> type, Object value) {
+            return get(type)
+                    .map(func -> func.transform(value))
+                    .orElse(value);
+        }
     }
 
     private static MethodCallCode newNumberMethodCallCode(Code inputCode, String valueMethod, boolean needToBox) {
         return new MethodCallCode(
                 needToBox ?
-                        new CastCode(new TypeCode("Number"), inputCode).wrap() :
+                        new CastCode(new TypeCode(Number.class), inputCode).wrap() :
                         inputCode,
                 valueMethod
         );
@@ -73,15 +79,15 @@ public class TransformMgr {
     }
 
     private static abstract class PrimitiveToPojoFunc implements TransformFunc {
-        private final String typeName;
+        private final Class<?> clazz;
 
-        PrimitiveToPojoFunc(String typeName) {
-            this.typeName = typeName;
+        PrimitiveToPojoFunc(Class<?> clazz) {
+            this.clazz = clazz;
         }
 
         @Override
         public Code genCode(Code inputCode, boolean boxed) {
-            return new CastCode(new TypeCode(typeName), inputCode);
+            return new CastCode(new TypeCode(clazz), inputCode);
         }
     }
 
@@ -100,7 +106,7 @@ public class TransformMgr {
 
     private static class PrimitiveShortToPojoFunc extends PrimitiveToPojoFunc {
         PrimitiveShortToPojoFunc() {
-            super("short");
+            super(short.class);
         }
 
         @Override
@@ -111,7 +117,7 @@ public class TransformMgr {
 
     private static class PrimitiveByteToPojoFunc extends PrimitiveToPojoFunc {
         PrimitiveByteToPojoFunc() {
-            super("byte");
+            super(byte.class);
         }
 
         @Override
@@ -129,7 +135,7 @@ public class TransformMgr {
         @Override
         public Code genCode(Code inputCode, boolean boxed) {
             return new CastCode(
-                    new TypeCode("char"),
+                    new TypeCode(char.class),
                     newNumberMethodCallCode(inputCode, "byteValue", !boxed)
             );
         }
@@ -166,7 +172,7 @@ public class TransformMgr {
         @Override
         public Code genCode(Code inputCode, boolean boxed) {
             return new CastCode(
-                    new TypeCode("char"),
+                    new TypeCode(char.class),
                     super.genCode(inputCode, boxed)
             );
         }
@@ -193,7 +199,7 @@ public class TransformMgr {
         @Override
         public Code genCode(Code inputCode, boolean boxed) {
             return boxed ?
-                    new CastCode(new TypeCode("int"), inputCode) :
+                    new CastCode(new TypeCode(int.class), inputCode) :
                     inputCode;
         }
     }

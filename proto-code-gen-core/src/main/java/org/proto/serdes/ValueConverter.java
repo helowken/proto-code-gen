@@ -1,5 +1,8 @@
 package org.proto.serdes;
 
+import org.proto.serdes.transform.TransformMgr;
+import org.proto.serdes.type.TypeClass;
+
 interface ValueConverter {
-    Object apply(CodecField codecField, Object oldValue, ConvertFunc convertFunc) throws Exception;
+    Object apply(TypeClass valueType, Object oldValue, ConvertFunc convertFunc, TransformMgr.FuncCache funcCache);
 }

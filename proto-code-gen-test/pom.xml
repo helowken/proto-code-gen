@@ -81,7 +81,7 @@
                         <param>
                             <baseDir>target\classes</baseDir>
                             <outputDir>src\main\java</outputDir>
-                            <converterClass>EntityConverter</converterClass>
+                            <converterClass>org.proto.test.EntityConverter</converterClass>
                             <includes>
                                 <param>org\.proto\.test\.entity\.\w+</param>
                             </includes>

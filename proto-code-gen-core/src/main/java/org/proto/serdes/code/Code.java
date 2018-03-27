@@ -4,6 +4,8 @@ import org.proto.serdes.utils.Element;
 import org.proto.serdes.utils.PrintIntf;
 import org.proto.serdes.utils.ProcessFunc;
 
+import java.util.List;
+
 public interface Code<T extends Code> extends PrintIntf<T> {
     Element getContent();
 
@@ -18,4 +20,10 @@ public interface Code<T extends Code> extends PrintIntf<T> {
     }
 
     T end();
+
+    Code getParent();
+
+    void setParent(Code parent);
+
+    List<Code> getChildren();
 }

@@ -3,7 +3,12 @@ package org.proto.serdes.code;
 import org.proto.serdes.utils.Element;
 import org.proto.serdes.utils.Row;
 
-public abstract class ExprCode extends CompoundCode<Code, ExprCode> {
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+public abstract class ExprCode extends AbstractCode<ExprCode> {
     final String op;
 
     private ExprCode(String op) {
@@ -23,6 +28,7 @@ public abstract class ExprCode extends CompoundCode<Code, ExprCode> {
         private UnaryExprCode(String op, Code code) {
             super(op);
             this.code = code;
+            code.setParent(this);
         }
 
         @Override
@@ -30,6 +36,11 @@ public abstract class ExprCode extends CompoundCode<Code, ExprCode> {
             return new Row()
                     .add(op)
                     .process(row -> addValue(row, code));
+        }
+
+        @Override
+        public List<Code> getChildren() {
+            return Collections.singletonList(code);
         }
     }
 
@@ -41,6 +52,8 @@ public abstract class ExprCode extends CompoundCode<Code, ExprCode> {
             super(op);
             this.left = left;
             this.right = right;
+            left.setParent(this);
+            right.setParent(this);
         }
 
         @Override
@@ -52,6 +65,17 @@ public abstract class ExprCode extends CompoundCode<Code, ExprCode> {
                     .add(" ")
                     .process(row -> addValue(row, right));
         }
+
+        @Override
+        public List<Code> getChildren() {
+            return Arrays.asList(left, right);
+        }
+    }
+
+    private static class CompoundExprCode extends BinaryExprCode {
+        private CompoundExprCode(String op, Code left, Code right) {
+            super(op, left, right);
+        }
     }
 
     private static class IfExprCode extends CompoundExprCode {
@@ -60,6 +84,7 @@ public abstract class ExprCode extends CompoundCode<Code, ExprCode> {
         public IfExprCode(Code testValue, Code trueValue, Code falseValue) {
             super(":", trueValue, falseValue);
             this.testValue = testValue;
+            testValue.setParent(this);
         }
 
         @Override
@@ -69,14 +94,15 @@ public abstract class ExprCode extends CompoundCode<Code, ExprCode> {
                     .add(" ? ")
                     .add(super.getContent());
         }
-    }
 
-    private static class CompoundExprCode extends BinaryExprCode {
-
-        private CompoundExprCode(String op, Code left, Code right) {
-            super(op, left, right);
+        @Override
+        public List<Code> getChildren() {
+            List<Code> cs = new ArrayList<>(super.getChildren());
+            cs.add(testValue);
+            return cs;
         }
     }
+
 
     private static Code convert(Object v) {
         if (v instanceof Code)

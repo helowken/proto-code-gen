@@ -4,9 +4,9 @@ import org.apache.maven.plugins.annotations.Parameter;
 
 public class CodeGenConfig extends BaseConfig {
     @Parameter(required = true)
-    private String converterClass;
+    String converterClass;
     @Parameter(required = true)
-    private String outputDir;
+    String outputDir;
 
     public String getOutputDir() {
         return outputDir;

@@ -1,6 +1,9 @@
 package org.proto.serdes.type;
 
 import com.google.protobuf.Descriptors;
+import org.proto.serdes.code.TypeCode;
+
+import java.util.Collection;
 
 public abstract class CollectionFieldClass extends CompoundTypeClass {
 
@@ -13,4 +16,8 @@ public abstract class CollectionFieldClass extends CompoundTypeClass {
         valueType.compute(targetDescriptor);
     }
 
+    @Override
+    public TypeCode getGenericProtoCode() {
+        return getTypeCode(Collection.class, TypeClass::getProtoCode);
+    }
 }

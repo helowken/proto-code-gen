@@ -12,6 +12,7 @@ public class ReturnCode extends AbstractCode<ReturnCode> {
 
     public ReturnCode(Code value) {
         this.value = value;
+        value.setParent(this);
     }
 
     @Override

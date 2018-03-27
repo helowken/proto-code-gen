@@ -11,7 +11,7 @@ public class IfStruct extends CompoundCode<Code, IfStruct> {
     private final boolean isElse;
     private final ExprCode exprCode;
     private final List<IfStruct> elseIfList = new ArrayList<>();
-    private CodeBody<Code> elseBody = new CodeBody<>();
+    private CodeBody<Code> elseBody = new CodeBody<>(this);
 
     public IfStruct(ExprCode exprCode) {
         this(exprCode, true);
@@ -25,6 +25,7 @@ public class IfStruct extends CompoundCode<Code, IfStruct> {
         this.exprCode = exprCode;
         this.forceBrace = forceBrace;
         this.isElse = isElse;
+        exprCode.setParent(this);
     }
 
     public ExprCode getExprCode() {
@@ -34,13 +35,23 @@ public class IfStruct extends CompoundCode<Code, IfStruct> {
     public IfStruct addElseIf(ExprCode exprCode, ProcessFunc<IfStruct> func) {
         IfStruct elseIf = new IfStruct(exprCode, forceBrace, true);
         func.apply(elseIf);
+        elseIf.setParent(this);
         this.elseIfList.add(elseIf);
         return this;
     }
 
     public IfStruct doElse(ProcessFunc<CodeBody<Code>> func) {
-        func.apply(elseBody);
+       func.apply(elseBody);
         return this;
+    }
+
+    @Override
+    public List<Code> getChildren() {
+        List<Code> cs = new ArrayList<>( super.getChildren());
+        cs.add(exprCode);
+        cs.addAll(elseIfList);
+        cs.add(elseBody);
+        return cs;
     }
 
     private Pair<String, String> getBraces(CodeBody<?> body) {

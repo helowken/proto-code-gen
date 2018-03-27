@@ -14,6 +14,8 @@ public class RefCode extends AbstractCode<RefCode> {
     public RefCode(Code caller, VariableCode value) {
         this.caller = caller;
         this.value = value;
+        caller.setParent(this);
+        value.setParent(this);
     }
 
     @Override

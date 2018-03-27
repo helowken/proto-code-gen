@@ -56,11 +56,17 @@ message ProtoTypeCast {
     int32 a = 1;
     int32 a2 = 2;
     map<string, int32> a3 = 3;
-    int32 c = 4;
-    int32 c2 = 5;
-    map<string, int32> c3 = 6;
-    int32 b = 7;
-    int32 b2 = 8;
-    map<string, int32> b3 = 9;
+    repeated int32 a4 = 4;
+    repeated int32 a5 = 5;
+    int32 c = 6;
+    int32 c2 = 7;
+    map<string, int32> c3 = 8;
+    repeated int32 c4 = 9;
+    repeated int32 c5 = 10;
+    int32 b = 11;
+    int32 b2 = 12;
+    map<string, int32> b3 = 13;
+    repeated int32 b4 = 14;
+    repeated int32 b5 = 15;
 }
 

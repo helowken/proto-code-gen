@@ -1,6 +1,7 @@
 package org.proto.serdes.type;
 
 import com.google.protobuf.Descriptors;
+import org.proto.serdes.code.TypeCode;
 
 import java.util.*;
 
@@ -11,6 +12,11 @@ public class MapFieldClass extends CompoundTypeClass {
         super(Map.class, inner, valueType);
         this.keyType = keyType;
         keyType.setParent(this);
+    }
+
+    @Override
+    public TypeCode getGenericProtoCode() {
+        return getTypeCode(rawClass, TypeClass::getProtoCode);
     }
 
     public TypeClass getKeyType() {

@@ -6,6 +6,7 @@ import org.proto.serdes.info.FieldInfo;
 import org.proto.serdes.info.ProtoFieldInfo;
 import org.proto.serdes.method.BeanFieldSetMethod;
 import org.proto.serdes.method.SetMethodWrapper;
+import org.proto.serdes.transform.TransformMgr;
 import org.proto.serdes.type.ListFieldClass;
 import org.proto.serdes.type.MapFieldClass;
 import org.proto.serdes.type.SetFieldClass;
@@ -55,7 +56,7 @@ class InnerProtoSerdes<T> extends AbstractProtoSerdes<T> {
     @Override
     public MessageLite toProto(Object sPojo) {
         return toProtoHelper(sPojo, (protoObj, pojo) -> {
-            Object newValue = codecField.valueConverter.apply(codecField, pojo, ProtoSerdes::toProto);
+            Object newValue = codecField.valueConverter.apply(codecField.fieldInfo.getTypeClass(), pojo, ProtoSerdes::toProto, TransformMgr.toProtoCache);
             codecField.protoSetMethod.setValue(protoObj, newValue);
         });
     }
@@ -64,7 +65,7 @@ class InnerProtoSerdes<T> extends AbstractProtoSerdes<T> {
     public T toPojo(Object sProtoObj) {
         return toPojoHelper(sProtoObj, (protoObj, pojo) -> {
             Object oldValue = codecField.protoGetMethod.getValue(protoObj);
-            Object newValue = codecField.valueConverter.apply(codecField, oldValue, ProtoSerdes::toPojo);
+            Object newValue = codecField.valueConverter.apply(codecField.fieldInfo.getTypeClass(), oldValue, ProtoSerdes::toPojo, TransformMgr.toPojoCache);
             findSetMethod(pojoType.getClass()).setValue(pojo, newValue);
         });
     }

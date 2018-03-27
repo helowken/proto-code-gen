@@ -26,11 +26,6 @@ public abstract class CompoundTypeClass extends AbstractTypeClass {
     }
 
     @Override
-    public TypeCode getGenericProtoCode() {
-        return getTypeCode(rawClass, TypeClass::getProtoCode);
-    }
-
-    @Override
     public TypeCode getInstanceProtoCode() {
         return getTypeCode(getInstanceClass(), TypeClass::getProtoCode);
     }

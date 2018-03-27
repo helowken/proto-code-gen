@@ -51,7 +51,7 @@ public class ProtoCodeGen {
                                   Function<TypeClass, AssignmentCode<ParameterCode>> newCodeSupplier,
                                   Function<TypeClass, TypeCode> inputParamTypeFunc) {
         CompoundTypeClass typeClass = (CompoundTypeClass) codecField.fieldInfo.getTypeClass();
-        addImport(typeClass, classCode);
+//        addImport(typeClass, classCode);
         TypeClass valueType = typeClass.getValueType();
         return valueConverterCreator.apply(valueType)
                 .<Code>map(valueConverter -> {
@@ -183,7 +183,7 @@ public class ProtoCodeGen {
         String methodName = CONVERT_TO_POJO + (pojoType.isInner() ? pojoType.getProtoClassNameOrError() : getSimpleName(pojoType));
         String shortName = getShortName(pojoType, methodName, CONVERT_TO);
         ProtoSerdes<?> serdes = ProtoSerdesFactory.getInstance().getSerdes(pojoType);
-        addImport(pojoType, classCode);
+//        addImport(pojoType, classCode);
         return classCode.addMethod(methodName, () ->
                 new MethodDefineCode(
                         getModifier(pojoType),
@@ -212,71 +212,76 @@ public class ProtoCodeGen {
     }
 
     private static MethodDefineCode genToProto(TypeClass pojoType, ClassCode classCode) {
-        ProtoSerdes<?> serdes = ProtoSerdesFactory.getInstance().getSerdes(pojoType);
-        String protoClass = pojoType.getProtoClassNameOrError();
-        String builderClass = protoClass + "." + ProtoConst.BUILDER_CLASS;
-        addImport(pojoType, classCode);
-        classCode.addImport(ProtoConst.DEFAULT_JAVA_PACKAGE + "." + protoClass);
-        String methodName = CONVERT_TO_PROTO + protoClass;
-        String shortName = getShortName(pojoType, methodName, CONVERT_TO);
-        TypeCode typeCode = pojoType.getProtoCode();
-        AtomicInteger fieldCount = new AtomicInteger(0);
-        return classCode.addMethod(methodName, () ->
-                new MethodDefineCode(
-                        getModifier(pojoType),
-                        typeCode,
-                        shortName,
-                        new ParameterCode(pojoType.getGenericJavaCode(), OLD_VALUE)
-                )
-                        .add(new AssignmentCode<>(
-                                        new ParameterCode(new TypeCode(builderClass), NEW_VALUE),
-                                        new MethodCallCode(typeCode, ProtoConst.NEW_BUILDER_METHOD)
-                                ).end()
-                        )
-                        .process(mc ->
-                                serdes.getCodecFields().forEach(codecField -> {
-                                    codecField2ClassTag.put(codecField, methodName);
-                                    Code inputCode = defaultProtoValueGen.apply(codecField);
-                                    TypeClass fieldTypeClass = codecField.fieldInfo.getTypeClass();
-                                    Function<Code, Code> func = code ->
-                                            codecField.protoSetMethod.genCode(
-                                                    new VariableCode(NEW_VALUE),
-                                                    genProtoValue(codecField, classCode, code)
-                                            ).end();
-                                    if (fieldTypeClass.getRawClass().isPrimitive()) {
-                                        mc.add(func.apply(inputCode));
-                                    } else {
-                                        if (!(inputCode instanceof VariableCode)) {
-                                            addImport(fieldTypeClass, classCode);
-                                            VariableCode valueCode = new VariableCode(TMP_VALUE + fieldCount.addAndGet(1));
-                                            mc.add(
-                                                    new AssignmentCode<>(
-                                                            new ParameterCode(
-                                                                    fieldTypeClass.getGenericJavaCode(),
-                                                                    valueCode.getName()
-                                                            ),
-                                                            inputCode
-                                                    ).end()
-                                            );
-                                            inputCode = valueCode;
-                                        }
-                                        mc.add(
-                                                new IfStruct(
-                                                        ExprCode.isNotNull(inputCode)
-                                                ).add(func.apply(inputCode))
-                                        );
-                                    }
-                                })
-                        )
-                        .add(new ReturnCode(
-                                        MethodCallCode.create(NEW_VALUE, ProtoConst.BUILD_METHOD)
-                                ).end()
-                        )
-                        .process(mc -> {
-                            if (pojoType.isProto() && !pojoType.isInner())
-                                genSerialize(mc, pojoType, classCode);
-                        })
-        );
+        try {
+//            addImport(pojoType, classCode);
+            ProtoSerdes<?> serdes = ProtoSerdesFactory.getInstance().getSerdes(pojoType);
+            String protoClass = pojoType.getProtoClassNameOrError();
+            String builderClassName = ProtoConst.DEFAULT_JAVA_PACKAGE + "." + protoClass + "$" + ProtoConst.BUILDER_CLASS;
+            Class<?> builderClass = ProtoUtils.loadClass(builderClassName);
+//            classCode.addImport(ProtoUtils.loadClass(ProtoConst.DEFAULT_JAVA_PACKAGE + "." + protoClass));
+            String methodName = CONVERT_TO_PROTO + protoClass;
+            String shortName = getShortName(pojoType, methodName, CONVERT_TO);
+            TypeCode typeCode = pojoType.getProtoCode();
+            AtomicInteger fieldCount = new AtomicInteger(0);
+            return classCode.addMethod(methodName, () ->
+                            new MethodDefineCode(
+                                    getModifier(pojoType),
+                                    typeCode,
+                                    shortName,
+                                    new ParameterCode(pojoType.getGenericJavaCode(), OLD_VALUE)
+                            )
+                                    .add(new AssignmentCode<>(
+                                                    new ParameterCode(new TypeCode(builderClass), NEW_VALUE),
+                                                    new MethodCallCode(typeCode, ProtoConst.NEW_BUILDER_METHOD)
+                                            ).end()
+                                    )
+                                    .process(mc ->
+                                                    serdes.getCodecFields().forEach(codecField -> {
+                                                        codecField2ClassTag.put(codecField, methodName);
+                                                        Code inputCode = defaultProtoValueGen.apply(codecField);
+                                                        TypeClass fieldTypeClass = codecField.fieldInfo.getTypeClass();
+                                                        Function<Code, Code> func = code ->
+                                                                codecField.protoSetMethod.genCode(
+                                                                        new VariableCode(NEW_VALUE),
+                                                                        genProtoValue(codecField, classCode, code)
+                                                                ).end();
+                                                        if (fieldTypeClass.getRawClass().isPrimitive()) {
+                                                            mc.add(func.apply(inputCode));
+                                                        } else {
+                                                            if (!(inputCode instanceof VariableCode)) {
+//                                                addImport(fieldTypeClass, classCode);
+                                                                VariableCode valueCode = new VariableCode(TMP_VALUE + fieldCount.addAndGet(1));
+                                                                mc.add(
+                                                                        new AssignmentCode<>(
+                                                                                new ParameterCode(
+                                                                                        fieldTypeClass.getGenericJavaCode(),
+                                                                                        valueCode.getName()
+                                                                                ),
+                                                                                inputCode
+                                                                        ).end()
+                                                                );
+                                                                inputCode = valueCode;
+                                                            }
+                                                            mc.add(
+                                                                    new IfStruct(
+                                                                            ExprCode.isNotNull(inputCode)
+                                                                    ).add(func.apply(inputCode))
+                                                            );
+                                                        }
+                                                    })
+                                    )
+                                    .add(new ReturnCode(
+                                                    MethodCallCode.create(NEW_VALUE, ProtoConst.BUILD_METHOD)
+                                            ).end()
+                                    )
+                                    .process(mc -> {
+                                        if (pojoType.isProto() && !pojoType.isInner())
+                                            genSerialize(mc, pojoType, classCode);
+                                    })
+            );
+        } catch (Exception e) {
+            throw ProtoUtils.wrapError(e);
+        }
     }
 
     private static void genSerialize(MethodDefineCode convertMethodCode, TypeClass pojoType, ClassCode classCode) {
@@ -285,7 +290,7 @@ public class ProtoCodeGen {
         classCode.addMethod(methodName, () ->
                 new MethodDefineCode(
                         getModifier(pojoType),
-                        new TypeCode(byte[].class.getSimpleName()),
+                        new TypeCode(byte[].class),
                         shortName,
                         new ParameterCode(pojoType.getGenericJavaCode(), OLD_VALUE)
                 ).add(new CodeChain(false)
@@ -311,7 +316,7 @@ public class ProtoCodeGen {
                         getModifier(pojoType),
                         pojoType.getGenericJavaCode(),
                         methodName,
-                        new ParameterCode(byte[].class.getSimpleName(), OLD_VALUE)
+                        new ParameterCode(byte[].class, OLD_VALUE)
                 )
                         .addThrowable(errClass)
                         .add(new ReturnCode(
@@ -328,13 +333,13 @@ public class ProtoCodeGen {
         );
     }
 
-    private static void addImport(TypeClass typeClass, ClassCode classCode) {
-        classCode.addImport(typeClass.getRawClass());
-        classCode.addImport(typeClass.getInstanceClass());
-    }
+//    private static void addImport(TypeClass typeClass, ClassCode classCode) {
+//        classCode.addImport(typeClass.getRawClass());
+//        classCode.addImport(typeClass.getInstanceClass());
+//    }
 
     private static Code createNew(TypeClass typeClass, ClassCode classCode) {
-        addImport(typeClass, classCode);
+//        addImport(typeClass, classCode);
         return createNew(typeClass.getGenericJavaCode(), typeClass.getInstanceJavaCode());
     }
 

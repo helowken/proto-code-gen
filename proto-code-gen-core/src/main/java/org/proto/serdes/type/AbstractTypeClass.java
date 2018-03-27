@@ -1,8 +1,9 @@
 package org.proto.serdes.type;
 
 import org.proto.serdes.ProtoBasicTypes;
-import org.proto.serdes.code.TypeCode;
+import org.proto.serdes.ProtoConst;
 import org.proto.serdes.ProtoUtils;
+import org.proto.serdes.code.TypeCode;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -49,25 +50,11 @@ public abstract class AbstractTypeClass implements TypeClass {
     TypeCode getTypeCode(Class<?> clazz, Function<TypeClass, TypeCode> childMapFunc) {
         Collection<TypeClass> cs = getChildren();
         Object[] csCodes = cs.isEmpty() ? null : cs.stream().map(childMapFunc).toArray(Object[]::new);
-        return new TypeCode(getClassTypeName(clazz), csCodes);
-    }
-
-    private String getClassTypeName(Class<?> clazz) {
         Class<?> curr = clazz;
-        if (clazz.isMemberClass()) {
-            StringBuilder sb = new StringBuilder();
-            while (curr != null) {
-                if (sb.length() > 0)
-                    sb.insert(0, ".");
-                sb.insert(0, curr.getSimpleName());
-                curr = curr.getDeclaringClass();
-            }
-            return sb.toString();
-        }
         if (parent != null) {
             curr = ProtoBasicTypes.getBoxClass(clazz).orElse(clazz);
         }
-        return curr.getSimpleName();
+        return new TypeCode(curr, csCodes);
     }
 
     @Override
@@ -82,8 +69,14 @@ public abstract class AbstractTypeClass implements TypeClass {
 
     @Override
     public TypeCode getProtoCode() {
-        if (isProto())
-            return new TypeCode(getProtoClassNameOrError());
+        if (isProto()) {
+            try {
+                String className = ProtoConst.DEFAULT_JAVA_PACKAGE + "." + getProtoClassNameOrError();
+                return new TypeCode(ProtoUtils.loadClass(className));
+            } catch (Exception e) {
+                throw ProtoUtils.wrapError(e);
+            }
+        }
         Class<?> clazz = ProtoBasicTypes.getProtoPrimitive(rawClass).orElse(rawClass);
         return getTypeCode(clazz, TypeClass::getProtoCode);
     }

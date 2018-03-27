@@ -23,15 +23,17 @@ public class ProtoUtils {
         return new RuntimeException(t);
     }
 
+    public static Class<?> loadClass(String name) {
+        try {
+            return Thread.currentThread().getContextClassLoader().loadClass(name);
+        } catch (Exception e) {
+            throw ProtoUtils.wrapError(e);
+        }
+    }
+
     @SuppressWarnings("unchecked")
     static Class<? extends MessageLite> newProtoClass(String protoClassName) {
-        try {
-            return (Class<? extends MessageLite>) Thread.currentThread()
-                    .getContextClassLoader()
-                    .loadClass(ProtoConst.DEFAULT_JAVA_PACKAGE + "." + protoClassName);
-        } catch (Throwable t) {
-            throw wrapError(t);
-        }
+        return (Class<? extends MessageLite>) loadClass(ProtoConst.DEFAULT_JAVA_PACKAGE + "." + protoClassName);
     }
 
     private static String getProtoFieldName(Field pojoField, String fieldName) {

@@ -3,6 +3,9 @@ package org.proto.serdes.code;
 import org.proto.serdes.utils.Element;
 import org.proto.serdes.utils.Row;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class CastCode extends AbstractCode<CastCode> {
     private final TypeCode type;
     private final Code code;
@@ -11,15 +14,22 @@ public class CastCode extends AbstractCode<CastCode> {
     public CastCode(TypeCode type, Code code) {
         this.type = type;
         this.code = code;
+        type.setParent(this);
+        code.setParent(this);
     }
 
-    public CastCode(String type, String varName) {
-        this(new TypeCode(type), new VariableCode(varName));
+    public CastCode(Class<?> clazz, String varName) {
+        this(new TypeCode(clazz), new VariableCode(varName));
     }
 
     public CastCode wrap() {
         wrapped = true;
         return this;
+    }
+
+    @Override
+    public List<Code> getChildren() {
+        return Arrays.asList(type, code);
     }
 
     @Override
